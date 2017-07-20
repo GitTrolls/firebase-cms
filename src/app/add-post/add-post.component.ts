@@ -14,6 +14,8 @@ import { FirebaseApp } from 'angularfire2';
 })
 export class AddPostComponent implements OnInit {
 
+  @Input() folder: string;
+
   posts: FirebaseListObservable<any>;
   newURL: string;
   newDate: string;
@@ -27,9 +29,8 @@ export class AddPostComponent implements OnInit {
   storageRef: any;
   file: any;
   imageUrl: any;
-  currentPost: FirebaseObjectObservable<any>;
 
-  constructor(public af: FirebaseApp, public db: AngularFireDatabase, public snackBar: MdSnackBar, public globalService: GlobalService, public router: Router, public route: ActivatedRoute, private fb: FirebaseApp) {
+  constructor(public af: FirebaseApp, public db: AngularFireDatabase, public snackBar: MdSnackBar, public globalService: GlobalService, public route: ActivatedRoute, private fb: FirebaseApp) {
     this.newPublished = false;
     this.posts = db.list('/posts');
 
@@ -57,35 +58,9 @@ export class AddPostComponent implements OnInit {
           this.storageRef.child(path).getDownloadURL().then(function(url) {
             me.imageUrl = url;
             me.newThumbnail = url;
-
-            if (me.editMode) {
-              me.currentPost.update({
-                thumbnail: url
-              });
-            }
+            console.log('imageurl', url);
           });
       });
-  }
-
-  deleteImage() {
-    let storage = firebase.storage();
-    let imageRef = storage.refFromURL(this.imageUrl);
-
-    let me = this;
-    imageRef.delete().then(function() {
-      me.imageUrl = null;
-      me.newThumbnail = null;
-      let snackBarRef = me.snackBar.open('Image deleted', 'OK!', {
-        duration: 3000
-      });
-      if (me.editMode) {
-        me.currentPost.update({
-          thumbnail: null
-        });
-      }
-    }).catch(function(error) {
-      console.log('error', error);
-    });
   }
 
   addPost(newURL: string, newDate: string, newTitle: string, newBody: string, newPublished: boolean) {
@@ -94,10 +69,7 @@ export class AddPostComponent implements OnInit {
 
     if (newURL && newDate && newTitle && newBody && this.currentUser.uid) {
       if (this.editMode && this.postKey) {
-
-        this.currentPost = this.db.object('/posts/' + this.postKey);
-
-        this.currentPost.update({
+        this.db.object('/posts/' + this.postKey).update({
           url: newURL,
           dateAdded: Date.now(),
           date: dateTime,
@@ -129,9 +101,6 @@ export class AddPostComponent implements OnInit {
       let snackBarRef = this.snackBar.open('Post saved', 'OK!', {
         duration: 3000
       });
-      setTimeout(() => {
-        this.router.navigateByUrl('admin/posts');
-      }, 3300);
     }
   }
 
@@ -140,9 +109,7 @@ export class AddPostComponent implements OnInit {
         if (params && params.key) {
           this.editMode = true;
           this.postKey = params.key;
-          this.currentPost = this.db.object('/posts/' + params.key);
-
-          this.currentPost.subscribe(p => {
+          this.db.object('/posts/' + params.key).subscribe(p => {
             this.newURL = p.url;
             this.newDate = p.date;
             this.newTitle = p.title;
