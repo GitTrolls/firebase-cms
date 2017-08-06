@@ -6,7 +6,7 @@ A basic CMS + Front End theme built with Angular 4 (Angular CLI) and AngularFire
 
 Install [Angular CLI](https://cli.angular.io/)
 
-Run `npm install`
+Run `npm install` or `yarn install`
 
 ## Firebase setup
 
@@ -18,8 +18,8 @@ Within the project folder, run:
 cd src
 mkdir environments
 cd environments
-touch environments.ts
-touch environments.prod.ts
+touch environment.ts
+touch environment.prod.ts
 ```
 
 Open 'environments.ts' and add your Firebase config as follows:
@@ -53,14 +53,6 @@ export const environment = {
   }
 };
 ```
-
-## Create Admin Account
-
-You'll need to manually add your first admin account. To generate a hashcode for it...
-
-1) Run `npm run hashcode` and enter your email. Copy hasocode
-2) Create new entry in your firebaseDB under, `/admins/{HASCODE}/{EMAIL}`
-3) Create user in firebase user management with same email.
 
 ## Development server
 
