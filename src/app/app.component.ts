@@ -5,7 +5,6 @@ import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable }
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
 import { GlobalService } from './services/global.service';
-import { LocalCartService } from "app/services/localcart.service";
 
 @Component({
   selector: 'app-root',
@@ -18,13 +17,7 @@ export class AppComponent {
   theme: FirebaseObjectObservable<any>;
   user: Observable<firebase.User>;
 
-  constructor(
-    public router: Router,
-    public db: AngularFireDatabase,
-    public afAuth: AngularFireAuth,
-    public globalService: GlobalService,
-    public localCart: LocalCartService
-  ) {
+  constructor(public router: Router, public db: AngularFireDatabase, public afAuth: AngularFireAuth, public globalService: GlobalService) {
     this.nav = db.list('/menus/nav');
     this.theme = db.object('/theme');
 
@@ -47,8 +40,8 @@ export class AppComponent {
         });
       }
 
-      if (!currentUser && this.localCart.cartHasItems()) {
-        this.globalService.cart.next(this.localCart.cartGetItems());
+      if (!currentUser && window.localStorage.getItem('cart')) {
+        this.globalService.cart.next(JSON.parse(window.localStorage.getItem('cart')));
       }
     });
   }
@@ -60,7 +53,8 @@ export class AppComponent {
   logout() {
     this.globalService.cart.next(null);
     this.globalService.order.next(null);
-    this.localCart.clearAll();
+    window.localStorage.setItem('cart', null);
+    window.localStorage.setItem('order', null);
     this.afAuth.auth.signOut();
   }
 }

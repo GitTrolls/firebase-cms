@@ -22,7 +22,7 @@ touch environment.ts
 touch environment.prod.ts
 ```
 
-Open 'environment.ts' and add your Firebase config as follows:
+Open 'environments.ts' and add your Firebase config as follows:
 
 ```javascript
 export const environment = {
@@ -38,7 +38,7 @@ export const environment = {
 };
 ```
 
-Open 'environment.prod.ts' and add your Firebase config as follows:
+Open 'environments.prod.ts' and add your Firebase config as follows:
 
 ```javascript
 export const environment = {
@@ -58,7 +58,7 @@ export const environment = {
 
 You'll need to manually add your first admin account. To generate a hashcode for it...
 
-1) Run `npm run hashcode` and enter your email. Copy hashcode
+1) Run `npm run hashcode` and enter your email. Copy hasocode
 2) Create new entry in your firebaseDB under, `/admins/{HASCODE}/{EMAIL}`
 3) Create user in firebase user management with same email.
 
