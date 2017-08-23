@@ -34,7 +34,6 @@ export class AdminComponent implements OnInit {
             equalTo: currentAdmin.email
           }
         }).subscribe((a) => {
-          this.globalService.admin.next(a[0]);
           this.currentAdmin.role = a[0].role;
         });
       }

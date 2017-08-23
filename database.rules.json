@@ -5,12 +5,6 @@
     "categories": {
       ".indexOn": "slug"
     },
-    "admins": {
-      ".indexOn": "email"
-    },
-    "approvals/products": {
-      ".indexOn": "updatedBy"
-    },
     "orders": {
       ".indexOn": "uid"
     },

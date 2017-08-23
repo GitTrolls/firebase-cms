@@ -3,7 +3,6 @@ import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable }
 import { Router }    from '@angular/router';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { MdSnackBar, MdDialogRef, MdDialog } from '@angular/material';
-import { GlobalService } from '../../services/global.service';
 
 @Component({
   selector: 'app-admin-product-categories',
@@ -15,20 +14,14 @@ export class AdminProductCategoriesComponent implements OnInit {
   categories: FirebaseListObservable<any>;
   dialogRef: MdDialogRef<any>;
   selectedOption: any;
-  currentAdmin: any;
 
   constructor(
     public db: AngularFireDatabase,
     public router: Router,
     public dialog: MdDialog,
-    public snackBar: MdSnackBar,
-    public globalService: GlobalService
+    public snackBar: MdSnackBar
   ) {
     this.categories = db.list('/categories');
-
-    this.globalService.admin.subscribe((a) => {
-      this.currentAdmin = a;
-    });
   }
 
   editCategory(key: string) {
