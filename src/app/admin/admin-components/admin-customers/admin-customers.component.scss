@@ -1,0 +1,43 @@
+.button-container{
+    h2 {
+        display: inline-block;
+    }
+
+    button {
+        float: right;
+        margin: 18px 30px 30px 30px;
+    }
+}
+
+.customer {
+    cursor: pointer;
+
+    .content {
+        display: inline-block;
+        margin-top: 13px;
+        vertical-align: top;
+        width: calc(100% - 220px);
+    }
+
+    .active {
+        display: inline-block;
+        text-align: center;
+        width: 210px;
+
+        span {
+            font-size: .9em;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+    }
+}
+
+.customer-photo {
+    border-radius: 50%;
+    height: 45px;
+    margin-right: 15px;
+    vertical-align: middle;
+    width: 45px;
+}
