@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { Router }    from '@angular/router';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { MdSnackBar, MdDialogRef, MdDialog } from '@angular/material';
 import { GlobalService } from 'app/services/global.service';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-admin-product-categories',
@@ -13,7 +12,7 @@ import { Observable } from 'rxjs/Observable';
 })
 export class AdminProductCategoriesComponent implements OnInit {
 
-  categories: Observable<any>;
+  categories: FirebaseListObservable<any>;
   dialogRef: MdDialogRef<any>;
   selectedOption: any;
   currentAdmin: any;
@@ -25,7 +24,7 @@ export class AdminProductCategoriesComponent implements OnInit {
     public snackBar: MdSnackBar,
     public globalService: GlobalService
   ) {
-    this.categories = db.list('/categories').snapshotChanges();
+    this.categories = db.list('/categories');
 
     this.globalService.admin.subscribe((a) => {
       this.currentAdmin = a;
@@ -37,7 +36,7 @@ export class AdminProductCategoriesComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       this.selectedOption = result;
       if (this.selectedOption === 'delete') {
-        this.db.object('/categories/' + category.key).remove();
+        this.db.object('/categories/' + category.$key).remove();
 
         let snackBarRef = this.snackBar.open('Category deleted', 'OK!', {
           duration: 3000

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { MdSnackBar, MdDialogRef, MdDialog } from '@angular/material';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
 
@@ -11,22 +10,27 @@ import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
 })
 export class AdminAdminsComponent {
 
-  admins: Observable<any>;
+  admins: FirebaseListObservable<any>;
   selectedOption: any;
   dialogRef: MdDialogRef<any>;
   adminsObject: any;
 
   constructor(public db: AngularFireDatabase, public dialog: MdDialog, public snackBar: MdSnackBar) {
-    this.admins = db.list('/admins', ref => ref.orderByChild('email').limitToFirst(9999)).snapshotChanges();
+    this.admins = db.list('/admins', {
+      query: {
+        orderByChild: 'email',
+        limitToFirst: 9999
+      }
+    });
 
-    this.admins.subscribe((adminList:any) => {
+    this.admins.subscribe((adminList) => {
       this.adminsObject = adminList;
     });
   }
 
   countAdmin(email:string) {
     let matches = this.adminsObject.filter((item) => {
-      return item.payload.val().email === email;
+      return item.email === email;
     });
     return matches.length;
   }

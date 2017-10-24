@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { MdSnackBar, MdDialogRef, MdDialog } from '@angular/material';
-import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
-import { Observable } from 'rxjs/Observable';
+import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
 
 @Component({
   selector: 'app-admin-menus',
@@ -11,20 +10,16 @@ import { Observable } from 'rxjs/Observable';
 })
 export class AdminMenusComponent implements OnInit {
 
-  nav: Observable<any>;
+  nav: FirebaseListObservable<any>;
   selectedOption: any;
   dialogRef: MdDialogRef<any>;
   menuList: any;
   menuObject: any;
 
-  constructor(
-    public db: AngularFireDatabase,
-    public snackBar: MdSnackBar,
-    public dialog: MdDialog
-  ) {
+  constructor(public db: AngularFireDatabase, public snackBar: MdSnackBar, public dialog: MdDialog) {
     this.menuList = [];
     this.menuObject = {};
-    this.nav = db.list('/menus/nav').valueChanges();
+    this.nav = db.list('/menus/nav');
 
     this.nav.subscribe(items => {
       this.menuList = [];

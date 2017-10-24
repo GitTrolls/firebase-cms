@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { MdSnackBar, MdDialogRef, MdDialog } from '@angular/material';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
 import { GlobalService } from 'app/services/global.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'admin-orders',
@@ -13,8 +12,8 @@ import { Observable } from 'rxjs/Observable';
 })
 export class AdminOrdersComponent implements OnInit {
 
-  orders: Observable<any[]>;
-  users: Observable<any[]>;
+  orders: FirebaseListObservable<any>;
+  users: FirebaseListObservable<any>;
   selectedOption: String;
   currentAdmin: any;
 
@@ -27,14 +26,25 @@ export class AdminOrdersComponent implements OnInit {
     public route: ActivatedRoute
   ) {
 
-    this.users = db.list('/users').valueChanges();
+    this.users = db.list('/users');
 
     if (router.url.includes('customer')) {
       this.route.params.subscribe((params: Params) => {
-        this.orders = db.list('/orders', ref => ref.orderByChild('uid').equalTo(params.key).limitToFirst(99999)).snapshotChanges();
+        this.orders = db.list('/orders', {
+          query: {
+            orderByChild: 'uid',
+            equalTo:  params.key,
+            limitToFirst: 99999
+          }
+        });
       });
     } else {
-      this.orders = db.list('/orders', ref => ref.orderByChild('rdate').limitToFirst(99999)).snapshotChanges();
+      this.orders = db.list('/orders', {
+        query: {
+          orderByChild: 'rdate',
+          limitToFirst: 99999
+        }
+      });
     }
 
     this.globalService.admin.subscribe((a) => {

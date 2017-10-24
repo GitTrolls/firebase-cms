@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { MdSnackBar, MdDialogRef, MdDialog } from '@angular/material';
 import { GlobalService } from 'app/services/global.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -13,7 +13,8 @@ import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
 })
 export class AddPageComponent implements OnInit {
 
-  pages: Observable<any>;
+  pages: FirebaseListObservable<any>;
+  page: FirebaseObjectObservable<any>;
   newURL: string;
   newTitle: string;
   newBody: string;
@@ -22,9 +23,9 @@ export class AddPageComponent implements OnInit {
   editMode: boolean;
   pageKey: string;
   selectedOption: string;
-  currentModeratedPages: AngularFireList<any>;
+  currentModeratedPages: FirebaseListObservable<any>;
   entityObject: any;
-  currentPage: Observable<any>;
+  currentPage: any;
   awaitingApproval: string;
 
   constructor(
@@ -36,7 +37,7 @@ export class AddPageComponent implements OnInit {
     public dialog: MdDialog
   ) {
     this.newPublished = false;
-    this.pages = db.list('/pages').valueChanges();
+    this.pages = db.list('/pages');
     this.globalService.admin.subscribe(admin => {
       this.currentAdmin = admin;
     });
@@ -49,19 +50,23 @@ export class AddPageComponent implements OnInit {
           this.pageKey = params.key;
 
           if (this.router.url.includes('approval')) {
-            this.currentPage = this.db.object('/approvals/pages/' + params.key).valueChanges();
-            this.db.object('/approvals/pages/' + this.pageKey).valueChanges().subscribe((approvalPage:any) => {
+            this.currentPage = this.db.object('/approvals/pages/' + params.key);
+            this.db.object('/approvals/pages/' + this.pageKey).subscribe((approvalPage) => {
               this.entityObject = approvalPage;
             });
           } else {
-            this.currentPage = this.db.object('/pages/' + params.key).valueChanges();
+            this.currentPage = this.db.object('/pages/' + params.key);
 
             // check to see if any approvals are awaiting on this page
-            this.db.list('/approvals/pages', ref => ref.orderByChild('entityKey').equalTo(params.key)).snapshotChanges()
-              .subscribe((approval:any) => {
-                if (approval.length > 0 && approval[0]) {
-                  this.awaitingApproval = approval[0].key;
-                }
+            this.db.list('/approvals/pages', {
+              query: {
+                orderByChild: 'entityKey',
+                equalTo: params.key
+              }
+            }).subscribe((approval) => {
+              if (approval.length > 0 && approval[0]) {
+                this.awaitingApproval = approval[0].$key;
+              }
             });
           }
 
@@ -102,7 +107,7 @@ export class AddPageComponent implements OnInit {
       if (this.editMode && this.pageKey) {
         this.db.object('/pages/' + this.pageKey).update(pageObject);
       } else {
-        this.db.list('/pages').push(pageObject).then((item) => {
+        this.pages.push(pageObject).then((item) => {
           this.db.object('/pages/' + item.key + '/entityKey').set(item.key);
         });
       }
@@ -137,9 +142,14 @@ export class AddPageComponent implements OnInit {
 
         this.currentModeratedPages = this.db.list('/approvals/pages/');
 
-        let adminApprovalPages = this.db.list('/approvals/pages/', ref => ref.orderByChild('updatedBy').equalTo(this.currentAdmin.uid));
+        let adminApprovalPages = this.db.list('/approvals/pages/', {
+          query: {
+            orderByChild: 'updatedBy',
+            equalTo: this.currentAdmin.uid
+          }
+        });
 
-        adminApprovalPages.valueChanges().take(1).subscribe((approvals:any) => {
+        adminApprovalPages.take(1).subscribe((approvals) => {
 
           let matchingApprovals = [];
           if (this.router.url.includes('approval')) {

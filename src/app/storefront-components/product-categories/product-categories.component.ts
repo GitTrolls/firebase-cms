@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
-import { AngularFireDatabase } from 'angularfire2/database';
-import { Observable } from 'rxjs/Observable';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 @Component({
   selector: 'product-categories',
@@ -9,14 +8,19 @@ import { Observable } from 'rxjs/Observable';
   styleUrls: ['./product-categories.component.scss']
 })
 export class ProductCategoriesComponent implements OnInit {
-  categories: Observable<any>;
+  categories: FirebaseListObservable<any[]>;
 
   constructor(
     public db: AngularFireDatabase,
     private title: Title,
     private meta: Meta
   ) {
-    this.categories = db.list('/categories', ref => ref.orderByChild('weight').limitToLast(999)).valueChanges();
+    this.categories = db.list('/categories', {
+      query: {
+        orderByChild: 'weight',
+        limitToLast: 999
+      }
+    });
   }
 
   ngOnInit() {

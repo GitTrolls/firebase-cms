@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { AngularFireDatabase } from 'angularfire2/database';
-import { Observable } from 'rxjs/Observable';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 
 @Component({
   selector: 'order',
@@ -13,7 +12,7 @@ export class OrderComponent implements OnInit {
   orderContent: any;
   order: any;
   admin: boolean;
-  customers: Observable<any>;
+  customers: FirebaseListObservable<any>;
 
   constructor(
     public db: AngularFireDatabase,
@@ -23,7 +22,7 @@ export class OrderComponent implements OnInit {
     private meta: Meta
   ) {
     this.admin = false;
-    this.customers = db.list('/users').valueChanges();
+    this.customers = db.list('/users');
   }
 
   ngOnInit() {
@@ -36,10 +35,9 @@ export class OrderComponent implements OnInit {
       this.meta.updateTag({ content: 'View the order dtails' }, "name='description'");
 
       this.orderContent = this.db.object('/orders/' + params.key);
-      this.orderContent.valueChanges().subscribe((o) => {
+      this.orderContent.subscribe((o) => {
         if (o) {
           this.order = o;
-          this.order.key = params.key;
         } else {
           this.order = {
             title: 'Order Not Found',

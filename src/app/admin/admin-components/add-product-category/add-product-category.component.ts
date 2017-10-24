@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { MdSnackBar, MdDialogRef, MdDialog } from '@angular/material';
 import { GlobalService } from 'app/services/global.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -13,8 +13,8 @@ import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
 })
 export class AddProductCategoryComponent implements OnInit {
 
-  categories: AngularFireList<any>;
-  category: AngularFireObject<any>;
+  categories: FirebaseListObservable<any>;
+  category: FirebaseObjectObservable<any>;
   newName: string;
   newWeight: number;
   newProducts: any;
@@ -22,7 +22,7 @@ export class AddProductCategoryComponent implements OnInit {
   categoryKey: string;
   currentAdmin: any;
   selectedOption: string;
-  currentModeratedCategories: AngularFireList<any>;
+  currentModeratedCategories: FirebaseListObservable<any>;
   entityObject: any;
   currentCategory: any;
   awaitingApproval: string;
@@ -50,18 +50,22 @@ export class AddProductCategoryComponent implements OnInit {
 
           if (this.router.url.includes('approval')) {
             this.currentCategory = this.db.object('/approvals/categories/' + params.key);
-            this.db.object('/approvals/categories/' + this.categoryKey).valueChanges().subscribe((approvalCategory:any) => {
+            this.db.object('/approvals/categories/' + this.categoryKey).subscribe((approvalCategory) => {
               this.entityObject = approvalCategory;
             });
           } else {
             this.currentCategory = this.db.object('/categories/' + params.key);
 
             // check to see if any approvals are awaiting on this category
-            this.db.list('/approvals/categories', ref => ref.orderByChild('entityKey').equalTo(params.key)).snapshotChanges()
-              .subscribe((approval:any) => {
-                if (approval.length > 0 && approval[0]) {
-                  this.awaitingApproval = approval[0].key;
-                }
+            this.db.list('/approvals/categories', {
+              query: {
+                orderByChild: 'entityKey',
+                equalTo: params.key
+              }
+            }).subscribe((approval) => {
+              if (approval.length > 0 && approval[0]) {
+                this.awaitingApproval = approval[0].$key;
+              }
             });
           }
 
@@ -125,14 +129,19 @@ export class AddProductCategoryComponent implements OnInit {
       if (this.editMode && this.categoryKey) {
         this.currentModeratedCategories = this.db.list('/approvals/categories/');
 
-        let adminApprovalCategories = this.db.list('/approvals/categories/', ref => ref.orderByChild('updatedBy').equalTo(this.currentAdmin.uid));
+        let adminApprovalCategories = this.db.list('/approvals/categories/', {
+          query: {
+            orderByChild: 'updatedBy',
+            equalTo: this.currentAdmin.uid
+          }
+        });
 
-        adminApprovalCategories.snapshotChanges().take(1).subscribe((approvals:any) => {
+        adminApprovalCategories.take(1).subscribe((approvals) => {
 
           let matchingApprovals = [];
           if (this.router.url.includes('approval')) {
             matchingApprovals = approvals.filter((match) => {
-              return match.key === this.categoryKey;
+              return match.$key === this.categoryKey;
             });
           } else {
             matchingApprovals = approvals.filter((match) => {
