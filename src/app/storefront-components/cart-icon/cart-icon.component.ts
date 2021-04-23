@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { GlobalService } from '../../services/global.service';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { AngularFireAuth } from '@angular/fire/auth';
-import * as firebase from 'firebase/app';
 
 @Component({
   selector: 'cart-icon',

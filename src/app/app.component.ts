@@ -55,13 +55,13 @@ export class AppComponent {
   }
 
   login() {
-    this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    this.afAuth.signInWithPopup(new firebase.default.auth.GoogleAuthProvider());
   }
 
   logout() {
     this.globalService.cart.next(null);
     this.globalService.order.next(null);
     this.localCart.clearAll();
-    this.afAuth.auth.signOut();
+    this.afAuth.signOut();
   }
 }
